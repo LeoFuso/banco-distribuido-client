@@ -1,4 +1,4 @@
-package com.leofuso.academico.cd.bancod.client.configuration.properties;
+package com.leofuso.academico.cd.bancod.client.application.configuration.properties;
 
 import org.hibernate.validator.constraints.Range;
 import org.springframework.boot.context.properties.ConfigurationProperties;
