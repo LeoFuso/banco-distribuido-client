@@ -1,8 +1,10 @@
 package com.leofuso.academico.cd.bancod.client.domain;
 
+import com.leofuso.academico.cd.bancod.client.application.communication.commands.DepositoCommand;
 import com.leofuso.academico.cd.bancod.client.domain.integration.resources.ContaResource;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.client.ClientHttpRequestFactory;
 
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
@@ -12,19 +14,27 @@ public class OperacaoBancariaImpl implements OperacaoBancaria {
 
     private static final String RESOURCE = "contas";
 
-    private RestTemplate restTemplate;
+    private RestTemplateExtension restTemplate;
 
+    @NotNull
     private URI baseURI;
 
+    @NotNull
     private String protocol;
+
+    @NotNull
     private String serverAddress;
+
     private int serverPort;
 
-    public OperacaoBancariaImpl(String protocol, String serverAddress, int serverPort) {
+    public OperacaoBancariaImpl(String protocol,
+                                String serverAddress,
+                                int serverPort,
+                                ClientHttpRequestFactory clientHttpRequestFactory) {
         this.protocol = Objects.requireNonNull(protocol);
         this.serverAddress = Objects.requireNonNull(serverAddress);
         this.serverPort = serverPort;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = new RestTemplateExtension(clientHttpRequestFactory);
         this.baseURI = this.buildBaseURI();
     }
 
@@ -44,7 +54,11 @@ public class OperacaoBancariaImpl implements OperacaoBancaria {
 
     @Override
     public void deposito(int conta, double valor) {
-        throw new UnsupportedOperationException("Não implementado.");
+        String idPath = String.format("/%d/deposito", conta);
+        URI uri = baseURI.resolve(baseURI.getPath() + idPath);
+
+        final DepositoCommand command = DepositoCommand.produce(conta, valor);
+        URI location = restTemplate.putForLocation(uri, command);
     }
 
     @Override

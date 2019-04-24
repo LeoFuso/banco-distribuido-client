@@ -41,6 +41,14 @@
         </dependency>
         <!-- Spring Environment -->
 
+        <!-- For timeout behavior on RestTemplate -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.8</version>
+        </dependency>
+        <!-- For timeout behavior on RestTemplate -->
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
