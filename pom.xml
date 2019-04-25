@@ -14,6 +14,13 @@
     <name>banco-distribuido-client</name>
     <description>Projeto da Disciplina de Computação Distribuída - Client App para Banco Distribuído</description>
 
+    <scm>
+        <connection>scm:git:https://github.com/LeoFuso/banco-distribuido-client.git</connection>
+        <url>git@github.com:LeoFuso/banco-distribuido-client.git</url>
+        <developerConnection>scm:git:https://github.com/LeoFuso/banco-distribuido-client.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
         <java.version>1.8</java.version>
     </properties>
