@@ -1,8 +1,9 @@
 package com.leofuso.academico.cd.bancod.client.domain;
 
 import com.leofuso.academico.cd.bancod.client.application.communication.commands.DepositoCommand;
-import com.leofuso.academico.cd.bancod.client.domain.integration.resources.ContaResource;
-import org.springframework.http.client.ClientHttpRequestFactory;
+import com.leofuso.academico.cd.bancod.client.application.communication.commands.SaqueCommand;
+import com.leofuso.academico.cd.bancod.client.application.communication.commands.TransferenciaCommand;
+import com.leofuso.academico.cd.bancod.client.application.communication.resources.ContaResource;
 
 import javax.validation.constraints.NotNull;
 import java.net.URI;
@@ -30,17 +31,17 @@ public class OperacaoBancariaImpl implements OperacaoBancaria {
     public OperacaoBancariaImpl(String protocol,
                                 String serverAddress,
                                 int serverPort,
-                                ClientHttpRequestFactory clientHttpRequestFactory) {
+                                RestTemplateExtension restTemplate) {
         this.protocol = Objects.requireNonNull(protocol);
         this.serverAddress = Objects.requireNonNull(serverAddress);
         this.serverPort = serverPort;
-        this.restTemplate = new RestTemplateExtension(clientHttpRequestFactory);
+        this.restTemplate = restTemplate;
         this.baseURI = this.buildBaseURI();
     }
 
     private URI buildBaseURI() {
 
-        final String baseURL = String.format("%s://%s:%s/%s/", protocol, serverAddress, serverPort, OperacaoBancariaImpl.RESOURCE);
+        final String baseURL = String.format("%s://%s:%s/%s", protocol, serverAddress, serverPort, OperacaoBancariaImpl.RESOURCE);
 
         URI uri = null;
         try {
@@ -53,33 +54,63 @@ public class OperacaoBancariaImpl implements OperacaoBancaria {
     }
 
     @Override
-    public void deposito(int conta, double valor) {
+    public void reconfigure(String protocol, String serverAddress, Integer serverPort) {
+
+        this.protocol = Optional.ofNullable(protocol).orElse(this.protocol);
+        this.serverAddress = Optional.ofNullable(serverAddress).orElse(this.serverAddress);
+        this.serverPort = Optional.ofNullable(serverPort).orElse(this.serverPort);
+        this.baseURI = buildBaseURI();
+    }
+
+    @Override
+    public String getURI() {
+        return this.baseURI.toString();
+    }
+
+    @Override
+    public URI deposito(Integer conta, Double valor) {
+
         String idPath = String.format("/%d/deposito", conta);
         URI uri = baseURI.resolve(baseURI.getPath() + idPath);
-
         final DepositoCommand command = DepositoCommand.produce(conta, valor);
-        URI location = restTemplate.putForLocation(uri, command);
+        return restTemplate.putForLocation(uri, command);
+
     }
 
     @Override
-    public void saque(int conta, double valor) {
-        throw new UnsupportedOperationException("Não implementado.");
+    public URI saque(Integer conta, Double valor) {
+
+        String idPath = String.format("/%d/saque", conta);
+        URI uri = baseURI.resolve(baseURI.getPath() + idPath);
+        final SaqueCommand command = SaqueCommand.produce(conta, valor);
+        return restTemplate.putForLocation(uri, command);
+
     }
 
     @Override
-    public void transferencia(int contaOrigem, int contaDestino, double valor) {
-        throw new UnsupportedOperationException("Não implementado.");
+    public URI transferencia(Integer contaOrigem, Integer contaDestino, Double valor) {
+
+        String idPath = String.format("/%d/transferencia", contaOrigem);
+        URI uri = baseURI.resolve(baseURI.getPath() + idPath);
+        final TransferenciaCommand command = TransferenciaCommand.produce(contaOrigem, contaDestino, valor);
+        return restTemplate.putForLocation(uri, command);
+
     }
 
     @Override
-    public double saldo(int conta) {
+    public ContaResource saldo(Integer conta) {
 
         String idPath = String.format("/%d", conta);
         URI uri = baseURI.resolve(baseURI.getPath() + idPath);
-        final ContaResource object = restTemplate.getForObject(uri, ContaResource.class);
+        return restTemplate.getForObject(uri, ContaResource.class);
 
-        return Optional.ofNullable(object)
-                .map(ContaResource::getSaldo)
-                .orElseThrow(IllegalArgumentException::new);
+    }
+
+    @Override
+    public ContaResource saldo(URI uri) {
+
+        final URI nonNullUri = Objects.requireNonNull(uri);
+        return restTemplate.getForObject(nonNullUri, ContaResource.class);
+
     }
 }
