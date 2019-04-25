@@ -1,13 +1,25 @@
 package com.leofuso.academico.cd.bancod.client.domain;
 
+import com.leofuso.academico.cd.bancod.client.application.communication.resources.ContaResource;
+
+import java.net.URI;
+
 public interface OperacaoBancaria {
 
-    void deposito(int conta, double valor);
+    void reconfigure(String protocol,
+                     String serverAddress,
+                     Integer serverPort);
 
-    void saque(int conta, double valor);
+    String getURI();
 
-    void transferencia(int contaOrigem, int contaDestino, double valor);
+    URI deposito(Integer conta, Double valor);
 
-    double saldo(int conta);
+    URI saque(Integer conta, Double valor);
+
+    URI transferencia(Integer contaOrigem, Integer contaDestino, Double valor);
+
+    ContaResource saldo(Integer conta);
+
+    ContaResource saldo(URI uri);
 
 }
